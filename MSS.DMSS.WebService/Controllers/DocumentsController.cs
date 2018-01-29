@@ -1,10 +1,13 @@
 ﻿using MSS.DMSS.Console.Model;
+using MSS.DMSS.WebService.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using Unity;
 
@@ -26,35 +29,34 @@ namespace MSS.DMSS.WebService.Controllers
         }
 
         // GET api/<controller>/5
-        public string Get(int id)
+        public string Get(string id)
         {
-            return "value";
+            var cv = File.ReadAllText(id);
+            return cv;
         }
 
-        // POST api/<controller>
-        public async void Post()
+        [HttpPost]
+        public HttpResponseMessage UploadAsync()
         {
-            var res = await Request.Content.ReadAsStringAsync();
-        }
+            if (!Request.Content.IsMimeMultipartContent())
+                Request.CreateResponse(HttpStatusCode.UnsupportedMediaType);
 
-        public bool Post([FromBody]string value)
-        {
-            //var json = JsonConvert.DeserializeObject<Document>(value);
-            var type = "Word";
-            if (type == "Word")
-                _scenario.Run(value);
+            var path = Path.GetTempFileName();
+            FileDescriptor fname = new FileDescriptor();
+            foreach (string name in HttpContext.Current.Request.Files)
+            {
+                var file = HttpContext.Current.Request.Files[name];
+                file.SaveAs(path);
+                fname.FileName = file.FileName;
+                fname.ContentType = file.ContentType;
+                fname.SourcePath = path;
+            }
 
-            return true;
-        }
+            _scenario.Run(fname, out var converted);
+            var cv = File.ReadAllText(converted.ToString());
+            fname.DestinationPath = converted.ToString();
 
-        // PUT api/<controller>/5
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/<controller>/5
-        public void Delete(int id)
-        {
+            return Request.CreateResponse(HttpStatusCode.OK, fname);
         }
     }
 }

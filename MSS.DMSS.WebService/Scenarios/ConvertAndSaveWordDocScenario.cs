@@ -15,10 +15,10 @@ namespace MSS.DMSS.WebService.Scenarios
             _csrv = converter;
         }
 
-        public bool Run(object doc)
+        public bool Run(object source, out object destination)
         {
-            _csrv.Convert(doc);
-            return false;
+            destination = _csrv.Convert(source);
+            return true;
         }
 
         public Task<bool> RunAsync()

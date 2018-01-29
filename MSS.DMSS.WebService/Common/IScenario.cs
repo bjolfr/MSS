@@ -8,7 +8,7 @@ namespace MSS.DMSS.WebService
 {
     public interface IScenario
     {
-        bool Run(object doc);
+        bool Run(object source, out object destination);
         Task<bool> RunAsync();
     }
 }

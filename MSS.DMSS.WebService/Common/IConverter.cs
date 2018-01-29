@@ -8,6 +8,6 @@ namespace MSS.DMSS.WebService
 {
     public interface IConverterService
     {
-        object Convert(object obj);
+        string Convert(object obj);
     }
 }
